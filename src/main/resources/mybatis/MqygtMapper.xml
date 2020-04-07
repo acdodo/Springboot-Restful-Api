@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.app.dao.MqygtMapper">
+
+    <resultMap id="docMap" type="OfficialDoc">
+        <result property="id" column="official_doc_id" />
+        <result property="type" column="official_doc_type" />
+        <result property="zh" column="official_doc_zh" />
+        <result property="title" column="official_doc_title" />
+        <result property="unit1" column="official_doc_unit1" />
+        <result property="unit2" column="official_doc_unit2" />
+        <result property="content" column="official_doc_content" jdbcType="CLOB" javaType="java.lang.String" typeHandler="com.demo.app.common.ClobTypeHandler"/>
+        <result property="accessory" column="official_doc_accessory" />
+        <result property="drafter" column="official_doc_drafter" />
+        <result property="dpt" column="official_doc_dpt" />
+        <result property="status" column="official_doc_status" jdbcType="INTEGER" javaType="int"/>
+        <result property="signdate" column="official_doc_signdate" jdbcType="DATE" javaType="java.util.Date"/>
+        <result property="crDate" column="official_doc_date" />
+        <result property="upDate" column="official_doc_up_date" />
+        <result property="remark" column="official_doc_remark" />
+        <result property="name" column="official_doc_name" />
+        <result property="flowname" column="official_doc_flowname" />
+        <result property="flownameId" column="official_doc_flownameId" />
+        <result property="memo" column="official_doc_memo" />
+        <result property="comeUnit" column="doc_come_unit" />
+    </resultMap>
+
+    <sql id="OfficialDocColumnList">
+        official_doc_id,official_doc_type,official_doc_zh,official_doc_title,official_doc_unit1,official_doc_unit2,official_doc_content,official_doc_accessory,official_doc_drafter,official_doc_dpt,official_doc_status,official_doc_signdate,official_doc_date,official_doc_up_date,official_doc_remark,official_doc_name,official_doc_flowname,official_doc_flownameId,official_doc_memo,doc_come_unit
+    </sql>
+
+
+    <resultMap id="receiptOfficeMap" type="ReceiptOffice">
+        <result property="id" column="id" jdbcType="INTEGER" javaType="int"/>
+        <result property="title" column="title" />
+        <result property="identifier" column="identifier" />
+        <result property="createdate" column="createdate" jdbcType="DATE" javaType="java.util.Date"/>
+        <result property="type" column="type" />
+        <result property="urgent" column="urgent" />
+        <result property="keyword" column="keyword" />
+        <result property="unit" column="unit" />
+        <result property="enddate" column="enddate" jdbcType="DATE" javaType="java.util.Date"/>
+        <result property="dutysubject" column="dutysubject" />
+        <result property="booker" column="booker" />
+        <result property="bookdate" column="bookdate" jdbcType="DATE" javaType="java.util.Date"/>
+        <result property="flow" column="flow" />
+        <result property="imitate" column="imitate" />
+        <result property="passview" column="passview" />
+        <result property="daoview" column="daoview" />
+        <result property="passround" column="passround" />
+        <result property="remark" column="remark" />
+        <result property="status" column="status" />
+        <result property="account" column="account" />
+        <result property="content" column="content" jdbcType="CLOB" javaType="java.lang.String" typeHandler="com.demo.app.common.ClobTypeHandler"/>
+    </resultMap>
+
+    <sql id="receiptOfficeColumnList">
+		id,title,identifier,createdate,type,urgent,keyword,unit,enddate,dutysubject,booker,bookdate,flow,imitate,passview,daoview,passround,remark,status,account,content
+    </sql>
+
+    <resultMap id="noticeMap" type="Notice">
+        <result property="id" column="id" />
+        <result property="name" column="name" />
+        <result property="time" column="time" jdbcType="DATE" javaType="java.util.Date"/>
+        <result property="dr" column="dr" />
+        <result property="verifier" column="verifier" />
+        <result property="notes" column="notes" />
+        <result property="detailstwo" column="detailstwo" jdbcType="CLOB" javaType="java.lang.String" typeHandler="com.demo.app.common.ClobTypeHandler"/>
+    </resultMap>
+
+    <sql id="noticeColumnList">
+        id,name,time,dr,verifier,notes,detailstwo
+    </sql>
+
+    <select id="getGuidByuserName" resultType="java.util.Map">
+        select  t.guid as "guid",
+                t.cert_code as "certCode",
+                t.update_time as  "updateTime"
+        from mqapp_guid t
+        where t.username = #{userName}
+    </select>
+    <select id="getGuidByGuid" resultType="java.util.Map">
+        select  t.guid as "guid",
+                t.username as "userName",
+                t.cert_code as "certCode",
+                t.update_time as  "updateTime"
+        from mqapp_guid t
+        where t.guid = #{guid}
+    </select>
+    <insert id="insertGuid">
+        insert into mqapp_guid (guid,username,password,update_time,cert_code)
+        values (#{guid},#{userName},#{password},sysdate,#{certCode})
+    </insert>
+    <update id="updateGuid">
+        update mqapp_guid t
+        set t.guid=#{guid},t.update_time=sysdate
+        where t.username = #{userName}
+    </update>
+    <select id="getdbList" resultType="java.util.Map">
+        select row_number() over(order by b.OFFICIAL_DOC_ID) as "srnum",b.OFFICIAL_DOC_ID as "docId", b.OFFICIAL_DOC_TYPE as "docType",b.OFFICIAL_DOC_TITLE as "docTitle",b.OFFICIAL_DOC_DRAFTER as "docDrafter",b.OFFICIAL_DOC_DPT as "docDpt",to_char(b.OFFICIAL_DOC_DATE,'yyyy-mm-dd hh24:mi:ss') as "docDate", b.OFFICIAL_DOC_UNIT1 as "docunit1", b.OFFICIAL_DOC_UNIT2 as "docunit2", b.OFFICIAL_DOC_ZH as "doczh"
+        from YWGL_OFFICIAL_DOC b
+        where b.OFFICIAL_DOC_STATUS != 10
+        and b.OFFICIAL_DOC_ID in
+        <foreach collection="docIds" item="docId" index="index" open="(" close=")" separator=",">
+            #{docId}
+        </foreach>
+        <if test="dateStr!=null">and b.OFFICIAL_DOC_DATE &gt;= to_date(#{dateStr},'yyyy-mm-dd')</if>
+        <if test="dateEnd!=null">and b.OFFICIAL_DOC_DATE &lt;= to_date(#{dateEnd},'yyyy-mm-dd hh24:mi:ss')</if>
+        order by b.OFFICIAL_DOC_DATE
+    </select>
+    <select id="queryTask" resultType="java.util.Map">
+        select t.proc_inst_id_ as "procInstId", t.name_ as "taskName", t.id_ as "taskId"
+        from ACT_RU_TASK t
+        where t.assignee_ = #{assignee}
+    </select>
+    <select id="getBusinessKeyByprocInstId" resultType="java.util.Map">
+        select t.business_key_ as "businessKey"
+        from ACT_HI_PROCINST t
+        where  t.proc_inst_id_ = #{procInstId}
+    </select>
+    <select id="getdbById" resultMap="docMap" parameterType="Object">
+        select
+        <include refid="OfficialDocColumnList" />
+        from YWGL_OFFICIAL_DOC
+        where OFFICIAL_DOC_STATUS != 10
+        and OFFICIAL_DOC_ID = #{id}
+    </select>
+    <select id="getDocLogs" resultType="java.util.Map">
+        select t.official_doc_log_auditor as "operName", t.official_doc_log_nodname as "docNodName", t.official_doc_log_dept as "docDept", t.official_doc_log_result as "operResult", to_char(t.official_doc_log_date,'yyyy-mm-dd hh24:mi:ss') as "operDate", t.official_doc_log_remark as "operRemark" from ywgl_official_doc_log t where t.official_doc_log_result != 4 and t.official_doc_id = #{docId} order by t.official_doc_log_date desc
+    </select>
+    <select id="getybList" resultType="java.util.Map">
+        select row_number() over(order by b.OFFICIAL_DOC_ID) as "srnum", t.OFFICIAL_DOC_ID as "docid", t.OFFICIAL_DOC_TYPE as "docType", t.OFFICIAL_DOC_TITLE as "docTitle", t.OFFICIAL_DOC_DRAFTER as "docDrafter", t.OFFICIAL_DOC_DPT as "docDpt", t.DOC_COME_UNIT as "comeUnit", t.OFFICIAL_DOC_STATUS as "docStatus", to_char(b.OFFICIAL_DOC_LOG_DATE,'yyyy-mm-dd hh24:mi:ss') as "logDateStr", b.OFFICIAL_DOC_LOG_RESULT as "operResult", b.OFFICIAL_DOC_LOG_NODNAME as "logNodName", b.OFFICIAL_DOC_LOG_NODNAMEID as "logNodNameId", t.OFFICIAL_DOC_FLOWNAMEID as "flowNameId" from YWGL_OFFICIAL_DOC t, (select t1.* from YWGL_OFFICIAL_DOC_LOG t1 where t1.OFFICIAL_DOC_LOG_AUDITOR = #{userName} ) b where t.OFFICIAL_DOC_STATUS != 10 and t.OFFICIAL_DOC_ID = b.OFFICIAL_DOC_ID and b.OFFICIAL_DOC_LOG_RESULT != 4
+        <if test="dateStr!=null">and b.OFFICIAL_DOC_LOG_DATE &gt;= to_date(#{dateStr},'yyyy-mm-dd')</if>
+        <if test="dateEnd!=null">and b.OFFICIAL_DOC_LOG_DATE &lt;= to_date(#{dateEnd},'yyyy-mm-dd hh24:mi:ss')</if>
+        order by t.OFFICIAL_DOC_ID, b.OFFICIAL_DOC_LOG_DATE desc
+    </select>
+
+    <select id="readyReadList" resultType="java.util.Map">
+        select row_number() over(order by a.id_) as rnum,a.id_,a.name_,
+				  a.assignee_,to_char(a.start_time_, 'yyyy-mm-dd hh24:mi:ss.ff') as startTime
+				  from act_hi_taskinst a where a.assignee_= #{userName}
+				  and proc_def_id_ like 'ReceiptOffice%' and a.end_time_ is null
+        <if test="dateStr!=null">and a.start_time_ &gt;= to_date(#{dateStr},'yyyy-mm-dd')</if>
+        <if test="dateEnd!=null">and a.start_time_ &lt;= to_date(#{dateEnd},'yyyy-mm-dd hh24:mi:ss')</if>
+    </select>
+
+    <select id="checkId" resultType="java.util.Map">
+        select a.business_key_ from act_hi_procinst a where a.id_=(select b.proc_inst_id_ from act_hi_taskinst b where b.id_=#{id})
+    </select>
+
+    <select id="getReadyRead" resultMap="receiptOfficeMap" parameterType="Object">
+        select
+        <include refid="receiptOfficeColumnList" />
+        from T_RECEIPT_OFFICE
+        where ID = #{id}
+    </select>
+
+    <select id="getAllDocTables" resultType="java.util.Map">
+        select row_number() over(order by a.id) rnum,a.id,a.title,a.identifier,to_char(a.createDate,'yyyy-mm-dd') as createdate,a.type,a.account,a.urgent,a.keyword,
+				  a.unit,a.fileaddr,to_char(a.endDate,'yyyy-mm-dd') as enddate,a.dutySubject,
+				  a.booker,to_char(a.bookDate,'yyyy-mm-dd') as bookdate,a.flow,a.imitate,   a.status,
+				  case when a.status = '0' then '已登记' when a.status = '1' then '流程审核中' when a.status = '2' then '通过' else '不通过' end as status1, 
+				  a.passView,a.daoView,a.passRound,a.remark from t_receipt_office a where a.booker= #{userName}
+        <if test="dateStr!=null">and a.bookDate &gt;= to_date(#{dateStr},'yyyy-mm-dd')</if>
+        <if test="dateEnd!=null">and b.bookDate &lt;= to_date(#{dateEnd},'yyyy-mm-dd hh24:mi:ss')</if>
+    </select>
+
+    <select id="getNotice" resultMap="noticeMap">
+        select A.*
+        from
+        (select
+        <include refid="noticeColumnList" />
+        from MQ_NOTICE
+        order by time desc) A
+        where rownum = 1
+    </select>
+
+
+
+
+
+
+
+
+
+    <select id="getAllDeTables" resultType="java.util.Map">
+        select row_number() over(order by a.id) rnum,a.id,a.account,a.name,a.subject,a.oldsubject,a.firm,to_char(a.buydate,'yyyy-mm-dd') as buydate,to_char(a.usedate,'yyyy-mm-dd') as usedate,a.people,a.price,a.model,
+				  a.type,a.unit,a.num,a.bonumber,
+				  a.status,
+				  case when a.status = '0' then '启用' when a.status = '1' then '停用' else '借出' end as status1, 
+				  a.remark from t_device a 
+    </select>
+
+    <select id="getPersonWage" resultType="java.util.Map">
+        select row_number() over(order by w.id asc) rnum,w.id,e.name,d.unitname,p.positionname,w.basic,w.salary,w.deduct,w.tax,w.emolument,w.notice  from mq_wage w,mq_employee e,T_SYS_UNIT d,mq_position p  where w.eid = e.id and e.departmentnumber = d.id and e.positionnumber = p.positionnumber and e.employeenumber = #{userName}
+        <if test="dateStr!=null">and w.time &gt;= to_date(#{dateStr},'yyyy-mm-dd')</if>
+        <if test="dateEnd!=null">and w.time &lt;= to_date(#{dateEnd},'yyyy-mm-dd hh24:mi:ss')</if>
+    </select>
+
+    <select id="checkUser" resultType="java.util.Map">
+        select id,username,realname,trim(password) as password,wrongcount,to_date(to_char(sysdate,'yyyy-mm-dd'),'yyyy-mm-dd') - to_date(to_char(wrongdate,'yyyy-mm-dd'),'yyyy-mm-dd') differencetime  from t_sys_user where status='Y' AND  username = #{userName}
+    </select>
+
+    <select id="listMedicalFundApply" resultType="java.util.Map">
+        select row_number() OVER (order by a.create_time,a.update_time) rn,a.id,a.medical_no medicalno,a.dept_no deptno,d.unitname,a.applicant,p.realname applicantname,to_char(a.apply_time,'yyyy-mm-dd') as applytime,
+				 a.apply_reason applyreason,a.status,decode(a.status,'0','初始录入','1','待申请','2','审核中','9','审核完成') statusname,
+				 to_char(a.create_time,'yyyy-mm-dd') as createtime,a.create_user createuserid,to_char(a.update_time,'yyyy-mm-dd') as updatetime,
+				 a.update_user updateuserid,a.remark,b.realname createuser,c.realname updateuser
+				  from mq_medical_fund_apply a 
+				  left join t_sys_user b on a.create_user=b.username left join t_sys_user c on a.update_user=c.username left join t_sys_unit d on d.unitcode=a.dept_no 
+				  left join t_sys_user p on a.applicant=p.username
+    </select>
+
+    <select id="getAllEvaluation" resultType="java.util.Map">
+        select row_number() over(order by m.id asc) rnum,m.id,e.name,m.grade from mq_meaFlow m,mq_employee e where m.eid = e.id and dr = '2' and e.employeenumber = #{userName}
+    </select>
+</mapper>

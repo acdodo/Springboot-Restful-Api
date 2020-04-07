@@ -1,0 +1,39 @@
+server:
+  port: 8082
+
+#spring:
+#  datasource:
+#    url: jdbc:oracle:thin:@10.0.200.55:1521:demo
+#    driver-class-name: oracle.jdbc.OracleDriver
+#    username: abc
+#    password: 1234567
+
+  # activiti default configuration
+#  activiti:
+#    database-schema-update: true
+#    check-process-definitions: false
+#    process-definition-location-prefix: classpath:/processes/
+#    process-definition-location-suffixes:
+#      - **.bpmn
+#      - **.bpmn20.xml
+#    history-level: full
+
+mybatis:
+  mapper-locations: classpath*:mybatis/*Mapper.xml
+  type-aliases-package: com.grid.mqygtapp.entity
+
+# Logger config
+logging:
+  config: classpath:logback-spring.xml
+#自定义
+ur: http://localhost:8080/demo
+##jwt配置
+audience:
+  # 代表这个JWT的接收对象,存入audience
+  clientId: 098f6bcd4621d373cade4e832627b4f6
+  # 密钥, 经过Base64加密, 可自行替换
+  base64Secret: MDk4ZjZiY2Q0NjIxZDM3M2NhZGU0ZTgzMjYyN2I0ZjY=
+  # JWT的签发主体，存入issuer
+  name: restapiuser
+  # 过期时间，时间戳 7天
+  expiresSecond: 604800000
